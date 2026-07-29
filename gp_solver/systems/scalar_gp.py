@@ -111,7 +111,8 @@ class ScalarGPSystem(BaseGPSystem):
         # Default norm = n0 * L
         N0 = params.N0 if params.N0 is not None else n0 * L
 
-        psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
+        #psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
+        psi = self._build_gaussian(x, 0.0, 50.0) # uniform background, no soliton
 
         # Noise
         if params.noise_amplitude > 0.0:
@@ -197,6 +198,40 @@ class ScalarGPSystem(BaseGPSystem):
             n_solitons=1,
         )
         return cls(grid, params)
+
+    @staticmethod
+    def _build_uniform(x: np.ndarray) -> np.ndarray:
+        """
+        Build a uniform background wavefunction with optional phase gradient.
+
+
+        Returns
+        -------
+        (N,) complex128 np.ndarray
+            Complex wavefunction of the uniform background.
+        """
+        return np.ones_like(x, dtype=np.complex128)/np.sqrt(x.size)
+
+    @staticmethod
+    def _build_gaussian(x: np.ndarray, x0: float, sigma: float) -> np.ndarray:
+        """
+        Build a Gaussian wavefunction.
+
+        Parameters
+        ----------
+        x: np.ndarray
+            Spatial grid positions
+        x0: float
+            Center position of the Gaussian
+        sigma: float
+            Width of the Gaussian
+
+        Returns
+        -------
+        (N,) complex128 np.ndarray
+            Complex wavefunction of the Gaussian.
+        """
+        return np.exp(-((x - x0) ** 2) / (2 * sigma ** 2)).astype(np.complex128)
 
     @staticmethod
     def _build_single_soliton(x: np.ndarray, x0: float, v: float, n0: float, g: float = 1.0) -> np.ndarray:

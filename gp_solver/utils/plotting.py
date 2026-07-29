@@ -92,8 +92,8 @@ def plot_density_phase(
     # Plot phase
     ax = axs[1]
     ax.plot(x, phase/np.pi, color=_COLORS[comp % len(_COLORS)+1], lw=1.5)
-    ax.set_yticks([-1, -0.5, 0, 0.5, 1])
-    ax.set_yticklabels([r"$-\pi$", r"$-\pi/2$", r"$0$", r"$\pi/2$", r"$\pi$"])
+    #ax.set_yticks([-1, -0.5, 0, 0.5, 1])
+    #ax.set_yticklabels([r"$-\pi$", r"$-\pi/2$", r"$0$", r"$\pi/2$", r"$\pi$"])
     _style_ax(ax, xlabel=r"Position $x/\xi$", ylabel=r"Phase $\theta(x)/\pi$")
 
     fig.tight_layout()

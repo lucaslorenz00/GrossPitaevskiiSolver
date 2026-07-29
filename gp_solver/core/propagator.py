@@ -64,9 +64,9 @@ class SplitStepPropagator:
         # Precompute external potential phase once (time-independent traps)
         self._V_ext = getattr(system, "V_ext", None)   # (N,) array or None
 
-        # Precompute kinetic factors
-        self.kin_damp = self.grid.kinetic_damp_factor(1.0).real # float64
-        self.kin_phase = self.grid.kinetic_phase_factor_notrotating(1.0) 
+        # Precomputing kinetic factors now in run_imaginary_time() and run_real_time() with correct dt, dtau
+        # self.kin_damp = self.grid.kinetic_damp_factor(1.0).real # float64
+        # self.kin_phase = self.grid.kinetic_phase_factor_notrotating(1.0) 
 
         # Diagnostics callback: called every record_every steps during time steps
         self._diag_callbacks: List[Callable[[GPState], dict]] = []
@@ -136,11 +136,12 @@ class SplitStepPropagator:
         for step in range(1, steps + 1):
             self._step_imaginary(dtau, N0)
 
-            if step == 1:
+            step_to_plot = [10, 100, 500, 1000]
+            if step in step_to_plot: 
                 fig, ax = plot_density_phase(
                     state,
                     title=f"Imaginary time step {step}  (t={state.t:.3f})",
-                    show_analytical=True,
+                    show_analytical=False,
                     g=self.system.params.g,
                 )
                 plt.show()
@@ -216,7 +217,7 @@ class SplitStepPropagator:
 
         # Precompute kinetic phase factor (complex, for Strang splitting)
         # Precomputation moved to __init__ to avoid downpassing
-        # kin_phase = grid.kinetic_phase_factor(dt)   # (N,) complex128
+        self.kin_phase = grid.kinetic_phase_factor_notrotating(dt)   # (N,) complex128
 
         t_start = _time_module.time()
 
@@ -257,6 +258,7 @@ class SplitStepPropagator:
             3. Nonlinear  half-step (damping) and potential
             4. Renormalize to N0
         """
+        self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
         sys = self.system
         # state = self.state
         # Nonlinear half-step
@@ -265,7 +267,7 @@ class SplitStepPropagator:
         if self._V_ext is not None:
             self._apply_V_ext_imag(dtau / 2.0)
         # Full kinetic step in k-space
-        self._apply_kinetic_imag() # It happens here
+        self._apply_kinetic_imag()
         # External potential half-step
         if self._V_ext is not None:
             self._apply_V_ext_imag(dtau / 2.0)
