@@ -260,6 +260,7 @@ class SplitStepPropagator:
             4. Renormalize to N0
         """
         if self.soliton_velocity != 0.0:
+            print(f"Using rotating frame kinetic damping factor with omega={self.soliton_velocity}")
             self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.soliton_velocity).real    # (N,) float64
         else:
             self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
