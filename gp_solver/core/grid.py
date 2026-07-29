@@ -156,6 +156,25 @@ class Grid:
 
         return np.exp(-hbar_over_2m * self.k2 * dtau)
 
+    def kinetic_damp_factor_rotating(self, dtau: float, omega: float, hbar_over_2m: float = 0.5) -> np.ndarray:
+        """Imaginary time damping e^[-(h/2m) k^2 dtau]
+
+        Parameter
+        ---------
+        dtau: float
+            damping factor
+        omega: float
+            rotation frequency
+        hbar_over_2m: float
+            = 0.5 in dimensionaless units, could be changed
+
+        Returns
+        -------
+        (N,) float64 array
+        """
+
+        return np.exp(-hbar_over_2m * (self.k2 - 2j * omega * self.k) * dtau)
+
     # For representing object when printing
     # Only N, L, dx, kmax important
     def __repr__(self) -> str:

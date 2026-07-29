@@ -63,6 +63,7 @@ class SplitStepPropagator:
 
         # Precompute external potential phase once (time-independent traps)
         self._V_ext = getattr(system, "V_ext", None)   # (N,) array or None
+        self.soliton_velocity = getattr(system, "soliton_velocity", 0.0) # (N,) array or None
 
         # Precomputing kinetic factors now in run_imaginary_time() and run_real_time() with correct dt, dtau
         # self.kin_damp = self.grid.kinetic_damp_factor(1.0).real # float64
@@ -258,7 +259,10 @@ class SplitStepPropagator:
             3. Nonlinear  half-step (damping) and potential
             4. Renormalize to N0
         """
-        self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
+        if self.soliton_velocity != 0.0:
+            self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.soliton_velocity).real    # (N,) float64
+        else:
+            self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
         sys = self.system
         # state = self.state
         # Nonlinear half-step
