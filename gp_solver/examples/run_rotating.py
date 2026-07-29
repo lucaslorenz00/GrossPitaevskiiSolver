@@ -20,7 +20,7 @@ DT = 5e-3       # real-time timestep
 grid_A   = Grid(N=N, L=L)
 system_A = ScalarGPSystem(grid_A, ScalarGPParams(
     g                = g,
-    soliton_velocity = 0.5,    # stationary
+    soliton_velocity = 0.5,
     soliton_position = 0.0,    # centre of the box
     n_solitons       = 1,
     V_ext            = None,     # no external potential
@@ -28,22 +28,22 @@ system_A = ScalarGPSystem(grid_A, ScalarGPParams(
 
 print(f"\nSystem built.  State: {system_A.state}")
 
-print("\n[A] Plotting analytical seed (before imaginary time)...")
+print("\n[A] Plotting seed (before imaginary time)")
 fig, _ = plot_density_phase(
     system_A.state,
-    title="A — Initial seed  (analytical tanh, t=0)",
-    show_analytical=True,
+    title="A — Initial seed  (gaussian like)",
+    show_analytical=False,
     g=g)
 plt.show()
 
-print("\n[A] Running imaginary-time evolution (finding ground state)...")
+print("\n[A] Running imaginary-time evolution (finding ground state)")
 prop_A = SplitStepPropagator(system_A)
 prop_A.run_imaginary_time(
     steps        = 2000,
     dtau         = 5e-3,
     conv_tol     = 1e-9,      # Dont use anymore
     record_every = 200,
-    verbose      = True,
+    verbose      = False,
 )
 
 # Quick checks
@@ -53,7 +53,7 @@ kink  = phase[-1] - phase[0]
 print(r"\n  Phase kink $\Delta\theta$ = {kink/np.pi:.4f} $\pi$   (exact black soliton = 1.000 π)")
 print(f"  Norm          = {system_A.state.norm():.6f}   (should equal L = {L:.1f})")
 
-print("\n[A] Plotting ground state (after imaginary time)...")
+print("\n[A] Plotting ground state (after imaginary time)")
 fig, _ = plot_density_phase(
     system_A.state,
     title="A — Ground state  (after imaginary time)",
@@ -62,7 +62,8 @@ fig, _ = plot_density_phase(
 )
 plt.show()
 
-print("\n[A] Running real-time evolution  (t = 0 -> 30)...")
+"""
+print("\n[A] Running real-time evolution  (t = 0 -> 30)")
 
 densities_A, times_A = [], []
 
@@ -94,3 +95,4 @@ fig, _ = plot_density_spacetime(
     title     = "A — Space-time density  (vertical stripe = stationary soliton)",
 )
 plt.show()
+"""
