@@ -68,7 +68,7 @@ def plot_density_phase(
     
     # Create figure and axes
     fig, axs = plt.subplots(2, 1, figsize=(9, 6), constrained_layout=True, sharex=True)
-    fig.suptitle(title or f"{state.lable} | t= {state.t:.3f}", fontsize=13)
+    fig.suptitle(title or f"{state.label} | t= {state.t:.3f}", fontsize=13)
 
     # density
     ax = axs[0]
