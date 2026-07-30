@@ -20,13 +20,15 @@ DT = 5e-3       # real-time timestep
 grid_A   = Grid(N=N, L=L)
 system_A = ScalarGPSystem(grid_A, ScalarGPParams(
     g                = g,
-    soliton_velocity = 0.5,
+    soliton_velocity = 0.0,
     soliton_position = 0.0,    # centre of the box
     n_solitons       = 1,
-    V_ext            = None,     # no external potential
+    V_ext            = 0,     # no external potential
+    noise_amplitude  = 0,   # noise
 ))
 
 print(f"\nSystem built.  State: {system_A.state}")
+
 
 print("\n[A] Plotting seed (before imaginary time)")
 fig, _ = plot_density_phase(
@@ -50,7 +52,7 @@ prop_A.run_imaginary_time(
 psi   = system_A.state.psi_complex(0)
 phase = np.unwrap(np.angle(psi))
 kink  = phase[-1] - phase[0]
-print(r"\n  Phase kink $\Delta\theta$ = {kink/np.pi:.4f} $\pi$   (exact black soliton = 1.000 π)")
+print(r"\n  Phase kink $\Delta\theta$ =" + f"{kink/np.pi:.4f}" + r" $\pi$   (exact black soliton = 1.000 π)")
 print(f"  Norm          = {system_A.state.norm():.6f}   (should equal L = {L:.1f})")
 
 print("\n[A] Plotting ground state (after imaginary time)")
