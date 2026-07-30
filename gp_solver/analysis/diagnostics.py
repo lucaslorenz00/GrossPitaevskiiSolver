@@ -211,3 +211,9 @@ def find_soliton_position(state: GPState, comp: int = 0) -> float:
     x_soliton = state.grid.x[idx_min]  # Corresponding position
     
     return x_soliton
+
+def superfluid_fraction(state, comp=0):
+    n, L, dx = state.density(comp), state.grid.L, state.grid.dx
+    n_bar     = np.sum(n) * dx / L
+    inv_n_bar = np.sum(1.0 / n) * dx / L
+    return float(1.0 / (n_bar * inv_n_bar))
