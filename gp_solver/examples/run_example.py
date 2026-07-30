@@ -120,7 +120,7 @@ fig, _ = plot_density_phase(
     show_analytical=True,
     g=g,
 )
-save(fig, "A1_initial_seed.png")
+#save(fig, "A1_initial_seed.png")
 
 # ── A3. Imaginary-time evolution ──────────────────────────────────────────────
 # Replace t → -iτ. The GP equation becomes a diffusion equation that filters
@@ -154,7 +154,7 @@ fig, _ = plot_density_phase(
     show_analytical=True,
     g=g,
 )
-save(fig, "A2_ground_state.png")
+#save(fig, "A2_ground_state.png")
 
 # ── A4. Real-time evolution ────────────────────────────────────────────────────
 # Evolve with the full GP equation. The black soliton (v=0) is a stationary
@@ -182,7 +182,7 @@ fig, _ = plot_density_phase(
     system_A.state,
     title=f"A — After real time  t = {system_A.state.t:.0f}  (soliton must stay at x=0)",
 )
-save(fig, "A3_after_real_time.png")
+#save(fig, "A3_after_real_time.png")
 
 print("\n[A] Plotting space-time density map...")
 fig, _ = plot_density_spacetime(
@@ -191,7 +191,7 @@ fig, _ = plot_density_spacetime(
     densities = np.array(densities_A),
     title     = "A — Space-time density  (vertical stripe = stationary soliton)",
 )
-save(fig, "A4_spacetime.png")
+#save(fig, "A4_spacetime.png")
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -235,7 +235,7 @@ fig, _ = plot_density_phase(
     show_analytical=True,
     g=g,
 )
-save(fig, "B1_initial_seed.png")
+#save(fig, "B1_initial_seed.png")
 
 # ── B3. NO imaginary time — go straight to real time ─────────────────────────
 # See the note at the top of this file. Imaginary time kills the velocity.
@@ -294,7 +294,7 @@ fig, _ = plot_density_phase(
     system_B.state,
     title=f"B — After real time  t = {system_B.state.t:.0f}  (soliton moved right)",
 )
-save(fig, "B2_after_real_time.png")
+#save(fig, "B2_after_real_time.png")
 
 print("\n[B] Plotting space-time density map...")
 fig, _ = plot_density_spacetime(
@@ -303,7 +303,7 @@ fig, _ = plot_density_spacetime(
     densities = np.array(densities_B),
     title     = "B — Space-time density  (diagonal stripe = moving soliton, slope=1/v)",
 )
-save(fig, "B3_spacetime.png")
+#save(fig, "B3_spacetime.png")
 
 # ── B5. Overlay the measured trajectory on the space-time map ─────────────────
 print("\n[B] Space-time map with tracked trajectory overlaid...")
@@ -325,7 +325,7 @@ ax.set_title("B — Space-time with trajectory  (v = 0.5, slope = 2)", fontsize=
 ax.legend(fontsize=10, loc="upper left")
 ax.grid(True, alpha=0.2)
 fig.tight_layout()
-save(fig, "B4_spacetime_trajectory.png")
+#save(fig, "B4_spacetime_trajectory.png")
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -361,7 +361,7 @@ axes[1].annotate(f"n={0.5**2:.2f}\n(partial dip)", xy=(0, 0.25),
 
 
 fig.tight_layout()
-save(fig, "summary_comparison.png")
+#save(fig, "summary_comparison.png")
 
 
 # ═════════════════════════════════════════════════════════════════════════════
