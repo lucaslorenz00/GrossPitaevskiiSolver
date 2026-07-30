@@ -10,6 +10,7 @@ from typing import Callable, Optional, List
 import time as _time_module
 import matplotlib.pyplot as plt # only for analysis
 from gp_solver.utils.plotting import plot_density_phase # only for anaylsis right now
+import gp_solver.analysis.diagnostics as diagnostics
 
 #from gp_solver.core.grid      import Grid
 from gp_solver.core.state     import GPState
@@ -60,10 +61,12 @@ class SplitStepPropagator:
         self.gamma       = gamma
         self.temperature = temperature
         self.rng         = rng or np.random.default_rng() # default if None given
+        self.omega = system.params.omega # rotation frequency
+        print(self.omega)
 
         # Precompute external potential phase once (time-independent traps)
         self._V_ext = getattr(system, "V_ext", None)   # (N,) array or None
-        self.soliton_velocity = system.params.soliton_velocity if hasattr(system, "params") else 0.0
+        # self.soliton_velocity = system.params.soliton_velocity if hasattr(system, "params") else 0.0
 
         # Precomputing kinetic factors now in run_imaginary_time() and run_real_time() with correct dt, dtau
         # self.kin_damp = self.grid.kinetic_damp_factor(1.0).real # float64
@@ -120,13 +123,14 @@ class SplitStepPropagator:
         state = self.state
         grid  = self.grid
         N0    = state.norm()      # target norm (conserved)
-        omega = getattr(self.system, "omega", 0.0) # rotation frequency)
+        omega = self.system.params.omega # rotation frequency)
         energy = []
-        if self.soliton_velocity != 0.0:
-            # print(f"Using rotating frame kinetic damping factor with omega={self.soliton_velocity}") # check if omega is correct
-            self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.soliton_velocity).real    # (N,) float64
+        print(f"Using rotating frame kinetic damping factor with omega={self.omega}") # check if omega is correct
+        print(f"using v = {self.system.params.soliton_velocity}")
+        if self.omega != 0.0:
+            self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.omega)
         else:
-            self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
+            self.kin_damp = self.grid.kinetic_damp_factor(dtau)
 
         if verbose:
             print(f"[Imaginary time] N0={N0:.4f}, dtau={dtau:.2e}, "
@@ -140,10 +144,10 @@ class SplitStepPropagator:
         t_start   = _time_module.time()
 
         for step in range(1, steps + 1):
-            energy.append(self.system.get_energy())
+            energy.append(diagnostics.total_energy_scalar(state, self.system.g))
             self._step_imaginary(dtau, N0)
 
-            step_to_plot = [10, 100, 500, 1000]
+            step_to_plot = [100, 1000, 2000]
             if step in step_to_plot: 
                 fig, ax = plot_density_phase(
                     state,
