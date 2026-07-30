@@ -114,8 +114,7 @@ class Grid:
         (N,) complex128 array
         """
 
-        phase = -1j * hbar_over_2m * self.k2 * dt
-        return np.exp(phase)
+        return np.exp(-1j * hbar_over_2m * self.k2 * dt)
 
     def kinetic_phase_factor_rotating(self, dt: float, omega: float, hbar_over_2m: float = 0.5) -> np.ndarray:
         """
@@ -136,8 +135,7 @@ class Grid:
         (N,) complex128 array
         """
 
-        phase = -1j * (hbar_over_2m * self.k2  - omega * self.k)* dt
-        return np.exp(phase)
+        return np.exp( -1j * (hbar_over_2m * self.k2  - omega * self.k)* dt)
 
     def kinetic_damp_factor(self, dtau: float, hbar_over_2m: float = 0.5) -> np.ndarray:
         """Imaginary time damping e^[-(h/2m) k^2 dtau]
@@ -173,7 +171,7 @@ class Grid:
         (N,) complex128 array
         """
 
-        return np.exp(-(hbar_over_2m * self.k2 -  1j*omega * self.k) * dtau)
+        return np.exp(-(hbar_over_2m * self.k2 -  omega * self.k) * dtau) # complex or not complex?
 
     # For representing object when printing
     # Only N, L, dx, kmax important

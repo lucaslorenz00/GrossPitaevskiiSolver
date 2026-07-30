@@ -123,14 +123,16 @@ class SplitStepPropagator:
         state = self.state
         grid  = self.grid
         N0    = state.norm()      # target norm (conserved)
-        omega = self.system.params.omega # rotation frequency)
         energy = []
         print(f"Using rotating frame kinetic damping factor with omega={self.omega}") # check if omega is correct
         print(f"using v = {self.system.params.soliton_velocity}")
         if self.omega != 0.0:
             self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.omega)
+            # print(self.grid.kinetic_damp_factor(dtau))
+            # print(f"Difference in kin damp: {(np.abs(self.kin_damp - grid.kinetic_damp_factor(dtau)).max())/np.abs(self.kin_damp).max()}")
         else:
-            self.kin_damp = self.grid.kinetic_damp_factor(dtau)
+            self.kin_damp = grid.kinetic_damp_factor(dtau)
+        # plt.plot(self.kin_damp.real, label="Real part") # Just to check the kinetic damping factor
 
         if verbose:
             print(f"[Imaginary time] N0={N0:.4f}, dtau={dtau:.2e}, "
@@ -233,7 +235,10 @@ class SplitStepPropagator:
 
         # Precompute kinetic phase factor (complex, for Strang splitting)
         # Precomputation moved to __init__ to avoid downpassing
-        self.kin_phase = grid.kinetic_phase_factor_notrotating(dt)   # (N,) complex128
+        if self.omega != 0.0:
+            self.kin_phase = grid.kinetic_phase_factor_rotating(dt, self.omega)   # (N,) complex128
+        else:
+            self.kin_phase = grid.kinetic_phase_factor_notrotating(dt)   # (N,) complex128
 
         t_start = _time_module.time()
 
@@ -402,7 +407,6 @@ class SplitStepPropagator:
             pr    = state.psi_r[sl]
             pi    = state.psi_i[sl]
             # placeholder.add_langevin_noise(pr, pi, amp, self.rng) # change from KERNELS to somehwere else
-
 
     # Highly likely that deprecated
     def _estimate_mu_imtime_old(self, dtau: float) -> float:
