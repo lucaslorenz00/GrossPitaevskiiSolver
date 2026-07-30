@@ -112,7 +112,8 @@ class ScalarGPSystem(BaseGPSystem):
         N0 = params.N0 if params.N0 is not None else n0 * L
 
         #psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
-        psi = self._build_gaussian(x, 0.0, 50.0) # uniform background, no soliton
+        # psi = self._build_single_soliton(x, 0, 0.5, 1, 1)
+        psi = self._build_gaussian(x, 0, 100)
 
         # Noise
         if params.noise_amplitude > 0.0:
@@ -269,7 +270,36 @@ class ScalarGPSystem(BaseGPSystem):
         cos_th = np.sqrt(1.0 - beta**2)
         xi_v = 1.0 / (np.sqrt(2 * g * n0) * cos_th)  # Lorentz contracted width
 
-        tanh = cos_th * np.tanh((x - x0) / xi_v)
+        tanh = cos_th * np.abs(np.tanh((x - x0) / xi_v))
 
         psi = np.sqrt(n0) * (1j * beta + tanh).astype(np.complex128)
         return psi
+
+    def get_energy(self) -> float:
+        """
+        Compute the total energy of the system.
+
+        Returns
+        -------
+        float
+            Total energy of the system.
+        """
+        state = self.state
+        psi = state.psi_complex(0)
+        dx = self.grid.dx
+
+        # Kinetic energy term: (1/2) |d_x psi|^2
+        dpsi_dx = np.gradient(psi, dx)
+        kinetic_energy = 0.5 * np.sum(np.abs(dpsi_dx)**2) * dx
+
+        # Interaction energy term: (g/2) |psi|^4
+        interaction_energy = 0.5 * self.g * np.sum(np.abs(psi)**4) * dx
+
+        # External potential energy term: V_ext |psi|^2
+        if self.V_ext is not None:
+            potential_energy = np.sum(self.V_ext * np.abs(psi)**2) * dx
+        else:
+            potential_energy = 0.0
+
+        total_energy = kinetic_energy + interaction_energy + potential_energy
+        return total_energy
