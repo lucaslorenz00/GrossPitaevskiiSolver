@@ -87,7 +87,7 @@ def plot_density_phase(
             ax.legend(fontsize=9)
 
     _style_ax(ax, xlabel="x", ylabel=r"$Density |\psi|^2$", title=f"Density (Component {comp})")
-    ax.set_ylim(bottom=0.0)
+    #ax.set_ylim(bottom=0.0)
 
     # Plot phase
     ax = axs[1]

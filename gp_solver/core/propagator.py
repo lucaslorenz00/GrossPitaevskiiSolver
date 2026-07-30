@@ -63,7 +63,7 @@ class SplitStepPropagator:
 
         # Precompute external potential phase once (time-independent traps)
         self._V_ext = getattr(system, "V_ext", None)   # (N,) array or None
-        self.soliton_velocity = getattr(system, "soliton_velocity", 0.0) # (N,) array or None
+        self.soliton_velocity = system.params.soliton_velocity if hasattr(system, "params") else 0.0
 
         # Precomputing kinetic factors now in run_imaginary_time() and run_real_time() with correct dt, dtau
         # self.kin_damp = self.grid.kinetic_damp_factor(1.0).real # float64
@@ -99,7 +99,6 @@ class SplitStepPropagator:
         Might find saddle point.
 
         The wavefunction is renormalized to N_0 after every step to prevent collapse.
-        Converged when change in chemical potential mu = E/N is below conv_tol.
 
         Parameters
         ----------
@@ -122,6 +121,12 @@ class SplitStepPropagator:
         grid  = self.grid
         N0    = state.norm()      # target norm (conserved)
         omega = getattr(self.system, "omega", 0.0) # rotation frequency)
+        energy = []
+        if self.soliton_velocity != 0.0:
+            # print(f"Using rotating frame kinetic damping factor with omega={self.soliton_velocity}") # check if omega is correct
+            self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.soliton_velocity).real    # (N,) float64
+        else:
+            self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
 
         if verbose:
             print(f"[Imaginary time] N0={N0:.4f}, dtau={dtau:.2e}, "
@@ -135,6 +140,7 @@ class SplitStepPropagator:
         t_start   = _time_module.time()
 
         for step in range(1, steps + 1):
+            energy.append(self.system.get_energy())
             self._step_imaginary(dtau, N0)
 
             step_to_plot = [10, 100, 500, 1000]
@@ -175,6 +181,11 @@ class SplitStepPropagator:
                 """
 
         #self.system.mu = mu_prev or 1.0
+        plt.plot(np.arange(len(energy)), energy)
+        plt.xlabel("Step")
+        plt.ylabel("Energy")
+        plt.title("Imaginary Time Evolution")
+        plt.show()
         return state
 
     def run_real_time(
@@ -259,11 +270,7 @@ class SplitStepPropagator:
             3. Nonlinear  half-step (damping) and potential
             4. Renormalize to N0
         """
-        if self.soliton_velocity != 0.0:
-            print(f"Using rotating frame kinetic damping factor with omega={self.soliton_velocity}")
-            self.kin_damp = self.grid.kinetic_damp_factor_rotating(dtau, self.soliton_velocity).real    # (N,) float64
-        else:
-            self.kin_damp = self.grid.kinetic_damp_factor(dtau).real    # (N,) float64
+        
         sys = self.system
         # state = self.state
         # Nonlinear half-step
