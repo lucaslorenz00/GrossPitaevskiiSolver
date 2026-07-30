@@ -96,7 +96,7 @@ def total_energy_scalar(
     V_ext: np.ndarray = None,
 ) -> float:
     """Sum of all energy contributions for scalar GP."""
-    return sum(energy_scalar(state, g, V_ext))
+    return sum(energy_scalar(state, g))
 
 
 # Soliton specific diagnostics
