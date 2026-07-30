@@ -52,12 +52,13 @@ class ScalarGPParams:
     N0: float = None # computed from L if None
     V0: float = 0.0
     soliton_position: float = 0.0
-    soliton_velocity: float = 0.5
+    soliton_velocity: float = 0.0
     n_solitons: int = 1
     noise_amplitude: float = 0.0
     V_ext: np.ndarray = None # To save external potential, but maybe unused
     #mu: float = 1.0
-    omega: float = 0.5 # rotation frequency (for rotating frame)
+    omega: float = 0.0 # rotation frequency (for rotating frame)
+    winding: int = 0 # winding number for ring soliton (phase jump across box)
 
 class ScalarGPSystem(BaseGPSystem):
     """
@@ -82,8 +83,8 @@ class ScalarGPSystem(BaseGPSystem):
         self.params = params
         super().__init__(grid)
         self.g = params.g
-        if self.params.V_ext == None and self.params.V0 != 0.0:
-            self.V_ext = 0.5 * params.V0 * self.grid.x**2
+        if params.V_ext == None and params.V0 != 0.0:
+            params.V_ext = 0.5 * params.V0 * grid.x**2
 
     # BaseGPSystem interface
     ##########################
@@ -114,8 +115,9 @@ class ScalarGPSystem(BaseGPSystem):
         # psi = self._build_single_soliton(x, 0, 0.5, 1, 1)
         # psi = self._build_gaussian(x, 0, 100)
         # psi = self._build_jacobian(x, n0)
-        psi = self.build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=1)
+        # psi = self.build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=1)
         # psi = self._build_uniform(x)  # uniform background
+        psi = self._build_ring_dark_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
         # Noise
         if params.noise_amplitude > 0.0:
             rng  = np.random.default_rng()
@@ -289,11 +291,18 @@ class ScalarGPSystem(BaseGPSystem):
         psi = np.sqrt(n0) * np.sqrt(m) * sn
         return psi
 
-    def build_ring_soliton(self, x, L, g=1, n0=1, v=0.5, x0=0, winding=0):
+    def _build_ring_soliton(self, x, L, g=1, n0=1, v=0.0, x0=0, winding=0):
 
-        c = np.sqrt(g*n0)
+        if g <= 0:
+            raise ValueError("g must be positive for dark solitons")
+        else:
+            c = np.sqrt(g*n0)
 
-        beta = np.sqrt(1-(v/c)**2)
+        v_rel = v/c
+        if np.abs(v_rel) >= 1.0:
+            raise ValueError(f"Soliton velocity v/c_s must be in [0,1), got {v_rel}")
+
+        beta = np.sqrt(1.0-v_rel**2)
 
         # grey soliton
         psi = (
@@ -312,6 +321,27 @@ class ScalarGPSystem(BaseGPSystem):
 
         return np.sqrt(n0)*psi
 
+    def _build_ring_dark_soliton(
+        self, x: np.ndarray, L: float, g: float = 1.0, n0: float = 1.0,
+        v: float = 0.0, x0: float = 0.0, winding: int = 0) -> np.ndarray:
+        cs = np.sqrt(g * n0)
+        v_rel = v / cs
+        if np.abs(v_rel) >= 1.0:
+            raise ValueError(f"Soliton velocity v/c_s must be in (-1, 1), got {v_rel}")
+
+        cos_th = np.sqrt(1.0 - v_rel**2)
+        # tanh argument: cos_th * (x - x0) / (sqrt(2) * xi)
+        # xi = 1 / sqrt(2*g*n0) => (x - x0) * sqrt(g*n0)
+        tanh_arg = cos_th * (x - x0) * np.sqrt(g * n0)
+
+        psi_sol = np.sqrt(n0) * (1j * v_rel + cos_th * np.tanh(tanh_arg))
+
+        # Phase jump across soliton core
+        delta_phi = 2.0 * np.arccos(v_rel)
+        # Periodic BC background flow compensation
+        k_bg = (2.0 * np.pi * winding - delta_phi) / L
+
+        return psi_sol * np.exp(1j * k_bg * (x - x0))
 
     def get_energy(self) -> float:
         """
