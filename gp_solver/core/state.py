@@ -137,7 +137,7 @@ class GPState:
     def nonlinear_phase_scalar(self, dt, g):
         """
         apply_nonlinear_phase_scalar(psi_r, psi_i, n, dt, g)
-        e^{-i g |psi|² dt} applied in-place on the real/imag arrays.
+        e^{-i g |psi|^2 dt} applied in-place on the real/imag arrays.
         Used during half-step in Strang splitting.
         """
         density  = self.density()
@@ -150,7 +150,7 @@ class GPState:
 
     def nonlinear_damp_scalar(self, dtau, g):
         """
-        e^{- g |psi|² dtau} applied in-place on the real/imag arrays.
+        e^{- g |psi|^2 dtau} applied in-place on the real/imag arrays.
         Used during imaginary time evolution.
         """
         density  = self.density()

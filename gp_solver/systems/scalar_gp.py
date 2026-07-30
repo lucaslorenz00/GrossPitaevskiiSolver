@@ -111,11 +111,10 @@ class ScalarGPSystem(BaseGPSystem):
         # Default norm = n0 * L
         N0 = params.N0 if params.N0 is not None else n0 * L
 
-        #psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
-        # psi = self._build_single_soliton(x, 0, 0.5, 1, 1)
+        # psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
         # psi = self._build_gaussian(x, 0, 100)
         # psi = self._build_jacobian(x, n0)
-        # psi = self.build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=1)
+        # psi = self._build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
         # psi = self._build_uniform(x)  # uniform background
         psi = self._build_ring_dark_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
         # Noise

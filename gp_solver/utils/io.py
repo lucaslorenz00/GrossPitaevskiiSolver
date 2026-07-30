@@ -73,7 +73,7 @@ def save_checkpoint(
             pass   # skip history if not serializable
 
     np.savez_compressed(str(path), **save_dict)
-    print(f"[io] Saved checkpoint → {path}  "
+    print(f"[io] Saved checkpoint -> {path}  "
           f"(n_comp={state.n_comp}, t={state.t:.4f})")
 
 
@@ -169,4 +169,4 @@ def save_history_csv(state: GPState, filepath: str) -> None:
                 row.append(str(val) if val != "" else "")
             fh.write(",".join(row) + "\n")
 
-    print(f"[io] History exported → {path}  ({len(state.history)} rows)")
+    print(f"[io] History exported -> {path}  ({len(state.history)} rows)")

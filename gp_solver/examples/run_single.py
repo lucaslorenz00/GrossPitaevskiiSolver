@@ -11,7 +11,7 @@ from gp_solver.systems.scalar_gp import ScalarGPSystem, ScalarGPParams
 from gp_solver.utils.plotting    import plot_density_phase, plot_density_spacetime
 
 N  = 1024       # grid points
-L  = 200.0      # box length in units of ξ (healing lengths)
+L  = 200.0      # box length in units of xi (healing lengths)
 g  = -5e-1       # interaction strength (dimensionless)
 DT = 5e-3       # real-time timestep
 
@@ -49,7 +49,7 @@ prop_A.run_imaginary_time(
 psi   = system_A.state.psi_complex(0)
 phase = np.unwrap(np.angle(psi))
 kink  = phase[-1] - phase[0]
-print(r"\n  Phase kink $\Delta\theta$ = {kink/np.pi:.4f} $\pi$   (exact black soliton = 1.000 π)")
+print(r"\n  Phase kink $\Delta\theta$ = {kink/np.pi:.4f} $\pi$   (exact black soliton = 1.000 pi)")
 print(f"  Norm          = {system_A.state.norm():.6f}   (should equal L = {L:.1f})")
 
 print("\n[A] Plotting ground state (after imaginary time)...")

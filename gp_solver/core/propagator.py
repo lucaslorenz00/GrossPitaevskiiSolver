@@ -171,7 +171,7 @@ class SplitStepPropagator:
                     elapsed = _time_module.time() - t_start
                     print(f"  step {step:6d}/{steps}  |  "
                           f"norm={snap['norm']:.6f}  |  "
-                          #f"μ≈{mu_est:.6f}  |  "
+                          #f"mu≈{mu_est:.6f}  |  "
                           f"t={elapsed:.1f}s")
                 """
                 # Taken out for now
@@ -180,7 +180,7 @@ class SplitStepPropagator:
                     if rel_change < conv_tol:
                         if verbose:
                             print(f"[Imaginary time] Converged at step {step} "
-                                  f"(Δμ/μ = {rel_change:.2e})")
+                                  f"((Delta mu)/mu = {rel_change:.2e})")
                         break
 
                 mu_prev = mu_est
@@ -228,7 +228,7 @@ class SplitStepPropagator:
             raise ValueError(f"t_end={t_end} must be > state.t={state.t}")
 
         if verbose:
-            print(f"[Real time] t: {state.t:.4f} → {t_end:.4f}, "
+            print(f"[Real time] t: {state.t:.4f} -> {t_end:.4f}, "
                   f"dt={dt:.2e}, n_steps={n_steps}")
             print(f"  Langevin γ={self.gamma:.3g}, "
                   f"kT={self.temperature:.3g}")
@@ -468,7 +468,7 @@ class SplitStepPropagator:
     def _estimate_mu_imtime_decay(self) -> float:
         """
         Estimate chemical potential mu from the local norm decay rate during imaginary time. 
-        Uses the relation  mu ≈ -d(ln N)/dτ / (2 dtau).
+        Uses the relation  mu ≈ -d(ln N)/dtau / (2 dtau).
         This is only a rough estimate, exact mu should come from the energy functional.
         """
 
