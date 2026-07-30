@@ -52,11 +52,12 @@ class ScalarGPParams:
     N0: float = None # computed from L if None
     V0: float = 0.0
     soliton_position: float = 0.0
-    soliton_velocity: float = 0.0 # If later more than one soliton
+    soliton_velocity: float = 0.5
     n_solitons: int = 1
     noise_amplitude: float = 0.0
     V_ext: np.ndarray = None # To save external potential, but maybe unused
     #mu: float = 1.0
+    omega: float = 0.5 # rotation frequency (for rotating frame)
 
 class ScalarGPSystem(BaseGPSystem):
     """
@@ -81,10 +82,8 @@ class ScalarGPSystem(BaseGPSystem):
         self.params = params
         super().__init__(grid)
         self.g = params.g
-        if self.params.V0 != 0.0:
+        if self.params.V_ext == None and self.params.V0 != 0.0:
             self.V_ext = 0.5 * params.V0 * self.grid.x**2
-        else:
-            self.V_ext = None
 
     # BaseGPSystem interface
     ##########################
@@ -113,8 +112,10 @@ class ScalarGPSystem(BaseGPSystem):
 
         #psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
         # psi = self._build_single_soliton(x, 0, 0.5, 1, 1)
-        psi = self._build_gaussian(x, 0, 100)
-
+        # psi = self._build_gaussian(x, 0, 100)
+        # psi = self._build_jacobian(x, n0)
+        psi = self.build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=1)
+        # psi = self._build_uniform(x)  # uniform background
         # Noise
         if params.noise_amplitude > 0.0:
             rng  = np.random.default_rng()
@@ -270,10 +271,47 @@ class ScalarGPSystem(BaseGPSystem):
         cos_th = np.sqrt(1.0 - beta**2)
         xi_v = 1.0 / (np.sqrt(2 * g * n0) * cos_th)  # Lorentz contracted width
 
-        tanh = cos_th * np.abs(np.tanh((x - x0) / xi_v))
+        tanh = cos_th * np.tanh((x - x0) / xi_v)
 
         psi = np.sqrt(n0) * (1j * beta + tanh).astype(np.complex128)
         return psi
+
+    def _build_jacobian(self,x : np.ndarray, n0: float) -> np.ndarray:
+        from scipy.special import ellipj as ej
+        from scipy.special import ellipk as ek
+
+        m = 0.99
+        K = ek(m)
+        lam = self.grid.L / (4*K)
+
+        sn, cn, dn, ph = ej(x / lam, m)
+
+        psi = np.sqrt(n0) * np.sqrt(m) * sn
+        return psi
+
+    def build_ring_soliton(self, x, L, g=1, n0=1, v=0.5, x0=0, winding=0):
+
+        c = np.sqrt(g*n0)
+
+        beta = np.sqrt(1-(v/c)**2)
+
+        # grey soliton
+        psi = (
+            1j*v/c
+            + beta*np.tanh(beta*(x-x0))
+        )
+
+        # phase jump of soliton
+        delta_phi = 2*np.arccos(v/c)
+
+        # background phase gradient
+        k = (2*np.pi*winding - delta_phi)/L
+
+        # impose winding
+        psi *= np.exp(1j*k*x)
+
+        return np.sqrt(n0)*psi
+
 
     def get_energy(self) -> float:
         """
