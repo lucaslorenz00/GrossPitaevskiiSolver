@@ -173,7 +173,7 @@ class Grid:
         (N,) float64 array
         """
 
-        return np.exp(-hbar_over_2m * (self.k2 - 2j * omega * self.k) * dtau)
+        return np.exp(-(hbar_over_2m * self.k2 + 1j * omega * self.k + omega**2) * dtau)
 
     # For representing object when printing
     # Only N, L, dx, kmax important
