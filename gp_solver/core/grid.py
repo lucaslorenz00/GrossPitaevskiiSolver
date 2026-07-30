@@ -170,10 +170,10 @@ class Grid:
 
         Returns
         -------
-        (N,) float64 array
+        (N,) complex128 array
         """
 
-        return np.exp(-(hbar_over_2m * self.k2 + 1j * omega * self.k + omega**2) * dtau)
+        return np.exp(-(hbar_over_2m * self.k2 -  1j*omega * self.k) * dtau)
 
     # For representing object when printing
     # Only N, L, dx, kmax important
