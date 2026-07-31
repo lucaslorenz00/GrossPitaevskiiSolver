@@ -25,7 +25,7 @@ system_A = ScalarGPSystem(grid_A, ScalarGPParams(
     V_ext            = None,     # no external potential
     noise_amplitude  = 0,   # noise
     V0              = 0.0,   # external potential amplitude for harmonic trap
-    omega = np.pi/L*0.0,   # rotation frequency (for rotating frame)
+    omega = 0.0,   # rotation frequency (for rotating frame)
     winding = 0,   # winding number for ring soliton (phase jump across box)
 ))
 
@@ -39,6 +39,7 @@ fig, _ = plot_density_phase(
 plt.show()
 
 prop_A = SplitStepPropagator(system_A)
+"""
 prop_A.run_imaginary_time(
     steps        = 10000,
     dtau         = 5e-3,
@@ -46,6 +47,7 @@ prop_A.run_imaginary_time(
     record_every = 200,
     verbose      = False,
 )
+"""
 
 # Quick checks
 psi   = system_A.state.psi_complex(0)
