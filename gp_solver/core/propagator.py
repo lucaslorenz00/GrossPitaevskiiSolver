@@ -149,12 +149,12 @@ class SplitStepPropagator:
             energy.append(diagnostics.total_energy_scalar(state, self.system.g))
             self._step_imaginary(dtau, N0)
 
-            step_to_plot = [100, 1000, 2000]
+            step_to_plot = []#[100, 1200, 2000]
             if step in step_to_plot: 
                 fig, ax = plot_density_phase(
                     state,
-                    title=f"Imaginary time step {step}  (t={state.t:.3f})",
-                    show_analytical=False,
+                    title=f"After imaginary time step {step} (tau={state.t:.2f})",
+                    show_analytical=True,
                     g=self.system.params.g,
                 )
                 plt.show()

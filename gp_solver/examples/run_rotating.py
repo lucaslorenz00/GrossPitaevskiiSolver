@@ -25,7 +25,7 @@ system_A = ScalarGPSystem(grid_A, ScalarGPParams(
     V_ext            = None,     # no external potential
     noise_amplitude  = 0,   # noise
     V0              = 0.0,   # external potential amplitude for harmonic trap
-    omega = np.pi/L*0,   # rotation frequency (for rotating frame)
+    omega = np.pi/L*0.0,   # rotation frequency (for rotating frame)
     winding = 0,   # winding number for ring soliton (phase jump across box)
 ))
 
@@ -33,7 +33,7 @@ print(f"\nSystem ready.\nState: {system_A.state}")
 
 fig, _ = plot_density_phase(
     system_A.state,
-    title="Black soliton",
+    title="Black soliton embedded in background flow",
     show_analytical=True,
     g=g)
 plt.show()
