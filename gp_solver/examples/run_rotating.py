@@ -40,7 +40,7 @@ plt.show()
 
 prop_A = SplitStepPropagator(system_A)
 prop_A.run_imaginary_time(
-    steps        = 5000,
+    steps        = 10000,
     dtau         = 5e-3,
     conv_tol     = 1e-9,      # Dont use at the moment
     record_every = 200,

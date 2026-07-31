@@ -176,7 +176,7 @@ grid_B   = Grid(N=N, L=L)
 system_B = ScalarGPSystem(grid_B, ScalarGPParams(
     g                = g,
     soliton_velocity = 0.5,     # half the speed of sound
-    soliton_position = 20.0,    # start right of centre
+    soliton_position = 0.0,    # start right of centre
     n_solitons       = 1,
 ))
 print(f"\nSystem built.  State: {system_B.state}")
