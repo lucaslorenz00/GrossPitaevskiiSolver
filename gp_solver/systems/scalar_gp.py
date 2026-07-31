@@ -106,17 +106,15 @@ class ScalarGPSystem(BaseGPSystem):
         x = grid.x
         L = grid.L
 
-        # Bulk density n0 = 1 in dimensionless units
-        n0 = 1.0
-        # Default norm = n0 * L
-        N0 = params.N0 if params.N0 is not None else n0 * L
+        n0 = 1.0 # Bulk density (dimensionless) for the initial state
+        N0 = params.N0 if params.N0 is not None else n0 * L # default norm = n0 * L
 
         # psi = self._build_single_soliton(x, params.soliton_position, params.soliton_velocity, n0, params.g)
         # psi = self._build_gaussian(x, 0, 100)
         # psi = self._build_jacobian(x, n0)
-        # psi = self._build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
+        psi = self._build_ring_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
         # psi = self._build_uniform(x)  # uniform background
-        psi = self._build_ring_dark_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
+        # psi = self._build_ring_dark_soliton(x, L, g=params.g, n0=n0, v=params.soliton_velocity, x0=params.soliton_position, winding=params.winding)
         # Noise
         if params.noise_amplitude > 0.0:
             rng  = np.random.default_rng()
@@ -277,6 +275,7 @@ class ScalarGPSystem(BaseGPSystem):
         psi = np.sqrt(n0) * (1j * beta + tanh).astype(np.complex128)
         return psi
 
+    # A try to get along with the boundary conditions
     def _build_jacobian(self,x : np.ndarray, n0: float) -> np.ndarray:
         from scipy.special import ellipj as ej
         from scipy.special import ellipk as ek
@@ -290,7 +289,8 @@ class ScalarGPSystem(BaseGPSystem):
         psi = np.sqrt(n0) * np.sqrt(m) * sn
         return psi
 
-    def _build_ring_soliton(self, x, L, g=1, n0=1, v=0.0, x0=0, winding=0):
+    # probably same as _build_ring_soliton, maybe slightly different tanh argument
+    def _build_ring_soliton(self, x, L, g=1, n0=1, v=0.0, x0=0, winding=0)-> np.ndarray:
 
         if g <= 0:
             raise ValueError("g must be positive for dark solitons")
@@ -304,41 +304,35 @@ class ScalarGPSystem(BaseGPSystem):
         beta = np.sqrt(1.0-v_rel**2)
 
         # grey soliton
-        psi = (
-            1j*v/c
-            + beta*np.tanh(beta*(x-x0))
-        )
+        psi = (1j*v/c + beta*np.tanh(beta*(x-x0)))
 
-        # phase jump of soliton
-        delta_phi = 2*np.arccos(v/c)
+        delta_phi = 2*np.arccos(v/c) # phase kink
 
-        # background phase gradient
-        k = (2*np.pi*winding - delta_phi)/L
+        k = (2*np.pi*winding - delta_phi)/L # periodic BC background flow compensation (phase gradient)
 
         # impose winding
         psi *= np.exp(1j*k*x)
 
         return np.sqrt(n0)*psi
 
+    # probably same as _build_ring_soliton, maybe slightly different tanh argument
     def _build_ring_dark_soliton(
         self, x: np.ndarray, L: float, g: float = 1.0, n0: float = 1.0,
         v: float = 0.0, x0: float = 0.0, winding: int = 0) -> np.ndarray:
+
         cs = np.sqrt(g * n0)
         v_rel = v / cs
         if np.abs(v_rel) >= 1.0:
             raise ValueError(f"Soliton velocity v/c_s must be in (-1, 1), got {v_rel}")
 
         cos_th = np.sqrt(1.0 - v_rel**2)
-        # tanh argument: cos_th * (x - x0) / (sqrt(2) * xi)
-        # xi = 1 / sqrt(2*g*n0) => (x - x0) * sqrt(g*n0)
         tanh_arg = cos_th * (x - x0) * np.sqrt(g * n0)
 
         psi_sol = np.sqrt(n0) * (1j * v_rel + cos_th * np.tanh(tanh_arg))
 
-        # Phase jump across soliton core
-        delta_phi = 2.0 * np.arccos(v_rel)
-        # Periodic BC background flow compensation
-        k_bg = (2.0 * np.pi * winding - delta_phi) / L
+        delta_phi = 2.0 * np.arccos(v_rel) # phase kink
+
+        k_bg = (2.0 * np.pi * winding - delta_phi) / L # periodic BC background flow compensation (phase gradient)
 
         return psi_sol * np.exp(1j * k_bg * (x - x0))
 
@@ -367,6 +361,5 @@ class ScalarGPSystem(BaseGPSystem):
             potential_energy = np.sum(self.V_ext * np.abs(psi)**2) * dx
         else:
             potential_energy = 0.0
-
-        total_energy = kinetic_energy + interaction_energy + potential_energy
-        return total_energy
+    
+        return kinetic_energy + interaction_energy + potential_energy
